@@ -247,48 +247,6 @@ rosgraph_msgs_generate_messages_py/fast:
 	cd /home/cesar/ROS/catkin_ws/build && $(MAKE) -f agitr/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/build.make agitr/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/build
 .PHONY : rosgraph_msgs_generate_messages_py/fast
 
-# Convenience name for target.
-agitr/CMakeFiles/std_msgs_generate_messages_cpp.dir/rule:
-	cd /home/cesar/ROS/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 agitr/CMakeFiles/std_msgs_generate_messages_cpp.dir/rule
-.PHONY : agitr/CMakeFiles/std_msgs_generate_messages_cpp.dir/rule
-
-# Convenience name for target.
-std_msgs_generate_messages_cpp: agitr/CMakeFiles/std_msgs_generate_messages_cpp.dir/rule
-.PHONY : std_msgs_generate_messages_cpp
-
-# fast build rule for target.
-std_msgs_generate_messages_cpp/fast:
-	cd /home/cesar/ROS/catkin_ws/build && $(MAKE) -f agitr/CMakeFiles/std_msgs_generate_messages_cpp.dir/build.make agitr/CMakeFiles/std_msgs_generate_messages_cpp.dir/build
-.PHONY : std_msgs_generate_messages_cpp/fast
-
-# Convenience name for target.
-agitr/CMakeFiles/std_msgs_generate_messages_lisp.dir/rule:
-	cd /home/cesar/ROS/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 agitr/CMakeFiles/std_msgs_generate_messages_lisp.dir/rule
-.PHONY : agitr/CMakeFiles/std_msgs_generate_messages_lisp.dir/rule
-
-# Convenience name for target.
-std_msgs_generate_messages_lisp: agitr/CMakeFiles/std_msgs_generate_messages_lisp.dir/rule
-.PHONY : std_msgs_generate_messages_lisp
-
-# fast build rule for target.
-std_msgs_generate_messages_lisp/fast:
-	cd /home/cesar/ROS/catkin_ws/build && $(MAKE) -f agitr/CMakeFiles/std_msgs_generate_messages_lisp.dir/build.make agitr/CMakeFiles/std_msgs_generate_messages_lisp.dir/build
-.PHONY : std_msgs_generate_messages_lisp/fast
-
-# Convenience name for target.
-agitr/CMakeFiles/std_msgs_generate_messages_py.dir/rule:
-	cd /home/cesar/ROS/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 agitr/CMakeFiles/std_msgs_generate_messages_py.dir/rule
-.PHONY : agitr/CMakeFiles/std_msgs_generate_messages_py.dir/rule
-
-# Convenience name for target.
-std_msgs_generate_messages_py: agitr/CMakeFiles/std_msgs_generate_messages_py.dir/rule
-.PHONY : std_msgs_generate_messages_py
-
-# fast build rule for target.
-std_msgs_generate_messages_py/fast:
-	cd /home/cesar/ROS/catkin_ws/build && $(MAKE) -f agitr/CMakeFiles/std_msgs_generate_messages_py.dir/build.make agitr/CMakeFiles/std_msgs_generate_messages_py.dir/build
-.PHONY : std_msgs_generate_messages_py/fast
-
 hello.o: hello.cpp.o
 .PHONY : hello.o
 
@@ -332,9 +290,6 @@ help:
 	@echo "... rosgraph_msgs_generate_messages_cpp"
 	@echo "... rosgraph_msgs_generate_messages_lisp"
 	@echo "... rosgraph_msgs_generate_messages_py"
-	@echo "... std_msgs_generate_messages_cpp"
-	@echo "... std_msgs_generate_messages_lisp"
-	@echo "... std_msgs_generate_messages_py"
 	@echo "... test"
 	@echo "... hello.o"
 	@echo "... hello.i"

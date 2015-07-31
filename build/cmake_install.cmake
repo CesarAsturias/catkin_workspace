@@ -117,8 +117,14 @@ ENDIF(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unsp
 IF(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   INCLUDE("/home/cesar/ROS/catkin_ws/build/gtest/cmake_install.cmake")
+  INCLUDE("/home/cesar/ROS/catkin_ws/build/tum_simulator/cvg_sim_msgs/cmake_install.cmake")
+  INCLUDE("/home/cesar/ROS/catkin_ws/build/tum_simulator/tum_simulator/cmake_install.cmake")
   INCLUDE("/home/cesar/ROS/catkin_ws/build/agitr/cmake_install.cmake")
   INCLUDE("/home/cesar/ROS/catkin_ws/build/beginner_tutorials/cmake_install.cmake")
+  INCLUDE("/home/cesar/ROS/catkin_ws/build/ardrone_autonomy/cmake_install.cmake")
+  INCLUDE("/home/cesar/ROS/catkin_ws/build/tum_simulator/cvg_sim_gazebo/cmake_install.cmake")
+  INCLUDE("/home/cesar/ROS/catkin_ws/build/tum_simulator/cvg_sim_gazebo_plugins/cmake_install.cmake")
+  INCLUDE("/home/cesar/ROS/catkin_ws/build/tum_simulator/message_to_tf/cmake_install.cmake")
 
 ENDIF(NOT CMAKE_INSTALL_LOCAL_ONLY)
 
