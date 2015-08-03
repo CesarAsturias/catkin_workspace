@@ -351,6 +351,8 @@ SET(CMAKE_DEPEND_INFO_FILES
   "agitr/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/DependInfo.cmake"
   "beginner_tutorials/CMakeFiles/_beginner_tutorials_generate_messages_check_deps_AddTwoInts.dir/DependInfo.cmake"
   "beginner_tutorials/CMakeFiles/_beginner_tutorials_generate_messages_check_deps_Num.dir/DependInfo.cmake"
+  "beginner_tutorials/CMakeFiles/add_two_ints_client.dir/DependInfo.cmake"
+  "beginner_tutorials/CMakeFiles/add_two_ints_server.dir/DependInfo.cmake"
   "beginner_tutorials/CMakeFiles/beginner_tutorials_gencpp.dir/DependInfo.cmake"
   "beginner_tutorials/CMakeFiles/beginner_tutorials_generate_messages.dir/DependInfo.cmake"
   "beginner_tutorials/CMakeFiles/beginner_tutorials_generate_messages_cpp.dir/DependInfo.cmake"

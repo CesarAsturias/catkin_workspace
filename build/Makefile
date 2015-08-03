@@ -826,6 +826,32 @@ _beginner_tutorials_generate_messages_check_deps_Num/fast:
 .PHONY : _beginner_tutorials_generate_messages_check_deps_Num/fast
 
 #=============================================================================
+# Target rules for targets named add_two_ints_client
+
+# Build rule for target.
+add_two_ints_client: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 add_two_ints_client
+.PHONY : add_two_ints_client
+
+# fast build rule for target.
+add_two_ints_client/fast:
+	$(MAKE) -f beginner_tutorials/CMakeFiles/add_two_ints_client.dir/build.make beginner_tutorials/CMakeFiles/add_two_ints_client.dir/build
+.PHONY : add_two_ints_client/fast
+
+#=============================================================================
+# Target rules for targets named add_two_ints_server
+
+# Build rule for target.
+add_two_ints_server: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 add_two_ints_server
+.PHONY : add_two_ints_server
+
+# fast build rule for target.
+add_two_ints_server/fast:
+	$(MAKE) -f beginner_tutorials/CMakeFiles/add_two_ints_server.dir/build.make beginner_tutorials/CMakeFiles/add_two_ints_server.dir/build
+.PHONY : add_two_ints_server/fast
+
+#=============================================================================
 # Target rules for targets named beginner_tutorials_gencpp
 
 # Build rule for target.
@@ -2281,6 +2307,8 @@ help:
 	@echo "... rosgraph_msgs_generate_messages_py"
 	@echo "... _beginner_tutorials_generate_messages_check_deps_AddTwoInts"
 	@echo "... _beginner_tutorials_generate_messages_check_deps_Num"
+	@echo "... add_two_ints_client"
+	@echo "... add_two_ints_server"
 	@echo "... beginner_tutorials_gencpp"
 	@echo "... beginner_tutorials_generate_messages"
 	@echo "... beginner_tutorials_generate_messages_cpp"
