@@ -96,8 +96,9 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 # )
 
 ## Declare a cpp executable
-add_executable( hello hello.cpp)
-
+add_executable(hello src/hello.cpp)
+add_executable(set_bg_color src/set_bg_color.cpp)
+add_executable(pubvel_with_max src/pubvel_with_max.cpp)
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(agitr_node agitr_generate_messages_cpp)
@@ -106,7 +107,12 @@ add_executable( hello hello.cpp)
  target_link_libraries(hello
    ${catkin_LIBRARIES}
  )
-
+ target_link_libraries(set_bg_color
+   ${catkin_LIBRARIES}
+ ) 
+ target_link_libraries(pubvel_with_max
+   ${catkin_LIBRARIES}
+ )
 #############
 ## Install ##
 #############
