@@ -46,13 +46,18 @@ class Robot3D(object):
        
        # Initialize the position variable as Point type
         position = Point()
+        print "x",  position.x
+        print "y", position.y
 
        # Get the  position and rotation values
         while not rospy.is_shutdown():
             try:
                 (position, rotation) = self.get_odom()               
-                print "Position ", position
-                print "Rotation ", rotation
+                #print "Position ", position
+                #print "Rotation ", rotation
+                print "x = ", position.x
+                print "y = ", position.y
+                rospy.sleep(2)
             except:
                 continue
 
@@ -65,7 +70,7 @@ class Robot3D(object):
             rospy.loginfo("TF Exception")
             return
         
-        return (trans, rot)
+        return (Point(*trans), rot)
 
     def shutdown(self):
         # Always stop the robot when shutting down the node.
