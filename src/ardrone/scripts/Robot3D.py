@@ -19,13 +19,13 @@ import matplotlib.pyplot as plt
 
 
 class Robot3D(object):
-    def __init__(self):
-        self.node_name =' Robot3D'
+    def __init__(self, node_name):
+        self.node_name = node_name
 
-        rospy.init_node('Robot3D', anonymous=False)
-        rospy.loginfo("Starting node " + str(self.node_name))
+        rospy.init_node(node_name)
+        rospy.loginfo("Starting node " + str(node_name))
 
-        rospy.on_shutdown(self.shutdown)
+        rospy.on_shutdown(self.cleanup)
 
         # Rate at we will update 
         rate = 20
@@ -46,21 +46,7 @@ class Robot3D(object):
         self.base_frame = '/base_link'
        
        # Initialize the position variable as Point type
-        position = Point()
-       
-       # Get the  position and rotation values. This probably would be better placed in
-       # the ardrone(Robot3D) class.
-        while not rospy.is_shutdown():
-            try:
-                (position, rotation) = self.get_odom()               
-                #print "Position ", position
-                #print "Rotation ", rotation
-                print "x = ", position.x
-                print "y = ", position.y
-                
-                rospy.sleep(2)
-            except:
-                continue
+        position = Point()   
 
     def get_odom(self):
         # Get the current transform between the nav (inertial)  and base (body) frames 
@@ -73,7 +59,7 @@ class Robot3D(object):
         
         return (Point(*trans), Quaternion(*rot))
 
-    def shutdown(self):
+    def cleanup(self):
         # Always stop the robot when shutting down the node.
         rospy.loginfo("Stopping the robot...")
         rospy.sleep(1)
