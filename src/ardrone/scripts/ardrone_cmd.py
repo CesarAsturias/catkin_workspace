@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-#@file ardrone_cmd.py
-#@version 1.0
-#@date 2015-8-8
-#@author Cesar
+# @file ardrone_cmd.py
+# @version 1.0
+# @date 2015-8-8
+# @author Cesar
 
-## Class for sending commands to the ardrone. It inherits from 
+## Class for sending commands to the ardrone. It inherits from
 # the Robot3D class
 
 import rospy
@@ -13,21 +13,25 @@ import numpy as np
 import time
 from Robot3D import Robot3D
 
+
 class Ardrone(Robot3D):
-    ## Whenever we extend a class, we have to initialize the 
+    ## Whenever we extend a class, we have to initialize the
     #  parent class as well which is done with Python's
     #  super() function as shown in the following line
     def __init__(self, node_name):
-        ## We use super becasue maybe we will want to 
+        ## We use super becasue maybe we will want to
         ## override some functions of the Robot3D class
         super(Ardrone, self).__init__(node_name)
 
-        
         ## Get the position and rotation values
         while not rospy.is_shutdown():
             try:
                 (position, rotation) = self.get_odom()
-                print "x = ", position.x
+                print "base = ", position
+                (position_base, rotation_base) = self.base_to_nav()
+                print "nav = ", position_base
+                x_base = [position.x, position.y, position.z]
+                print x_base
                 rospy.sleep(2)
             except:
                 continue
@@ -38,7 +42,3 @@ if __name__ == '__main__':
         Ardrone(node_name)
     except KeyboardInterrupt:
         print "Shutting down ardrone node"
-
-            
-
-

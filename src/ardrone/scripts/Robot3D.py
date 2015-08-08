@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-##@file Robot3D.py
-#@version 1.0
-#@date 2015-8-7
-#@author Cesar
+## @file Robot3D.py
+# @version 1.0
+# @date 2015-8-7
+# @author Cesar
 
 ##
 # Generic class for a robot moving in 3D. It implements several methods
@@ -27,13 +27,13 @@ class Robot3D(object):
 
         rospy.on_shutdown(self.cleanup)
 
-        # Rate at we will update 
+        # Rate at we will update
         rate = 20
 
         # ROS rate variable
         r = rospy.Rate(rate)
 
-        # Create a tf.TransformListener object.
+        # Create a tf.TransformListener object
         self.tf_listener = tf.TransformListener()
 
        # Give tf some time to fill its buffer
@@ -44,21 +44,32 @@ class Robot3D(object):
 
        # set the base frame
         self.base_frame = '/base_link'
-       
+
        # Initialize the position variable as Point type
-        position = Point()   
+        position = Point()
 
     def get_odom(self):
-        # Get the current transform between the nav (inertial)  and base (body) frames 
+        # Get the current transform between the nav (inertial)
+        # and base (body) frames
         rospy.loginfo("Into get_odom")
         try:
             (trans, rot) = self.tf_listener.lookupTransform(self.nav_frame, self.base_frame, rospy.Time(0))
-        except (tf.Exception, tf.ConectivityException, tf.LookupException):
+        except (tf.Exception, tf.ConnectivityException, tf.LookupException):
             rospy.loginfo("TF Exception")
             return
-        
+
         return (Point(*trans), Quaternion(*rot))
 
+    def base_to_nav(self):
+        # Obtain the current transform betwen the base (body)
+        # and the nav (inertial) frames.
+        try:
+            (trans, rot) = self.tf_listener.lookupTransform(self.base_frame, self.nav_frame, rospy.Time(0))
+        except (tf.Exception, tf.ConnectivityException, tf.ExtrapolationException):
+            rospy.loginfo("TF Exception")
+            return
+        return (Point(*trans), Quaternion(*rot))
+    
     def cleanup(self):
         # Always stop the robot when shutting down the node.
         rospy.loginfo("Stopping the robot...")
@@ -69,4 +80,3 @@ if __name__ == '__main__':
         Robot3D()
     except:
         rospy.loginfo("Robot3D node terminated")
-
