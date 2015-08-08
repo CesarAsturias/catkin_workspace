@@ -13,7 +13,10 @@ import rospy
 import numpy as np
 import tf
 import time
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import Point, Quaternion
+import matplotlib
+import matplotlib.pyplot as plt
+
 
 class Robot3D(object):
     def __init__(self):
@@ -23,8 +26,6 @@ class Robot3D(object):
         rospy.loginfo("Starting node " + str(self.node_name))
 
         rospy.on_shutdown(self.shutdown)
-
-
 
         # Rate at we will update 
         rate = 20
@@ -46,10 +47,9 @@ class Robot3D(object):
        
        # Initialize the position variable as Point type
         position = Point()
-        print "x",  position.x
-        print "y", position.y
-
-       # Get the  position and rotation values
+       
+       # Get the  position and rotation values. This probably would be better placed in
+       # the ardrone(Robot3D) class.
         while not rospy.is_shutdown():
             try:
                 (position, rotation) = self.get_odom()               
@@ -57,6 +57,7 @@ class Robot3D(object):
                 #print "Rotation ", rotation
                 print "x = ", position.x
                 print "y = ", position.y
+                
                 rospy.sleep(2)
             except:
                 continue
@@ -70,7 +71,7 @@ class Robot3D(object):
             rospy.loginfo("TF Exception")
             return
         
-        return (Point(*trans), rot)
+        return (Point(*trans), Quaternion(*rot))
 
     def shutdown(self):
         # Always stop the robot when shutting down the node.
