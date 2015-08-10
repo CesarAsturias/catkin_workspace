@@ -27,11 +27,10 @@ class Ardrone(Robot3D):
         while not rospy.is_shutdown():
             try:
                 (position, rotation) = self.get_odom()
-                print "base = ", position
                 (position_base, rotation_base) = self.base_to_nav()
-                print "nav = ", position_base
-                x_base = [position.x, position.y, position.z]
-                print x_base
+                pose = self.create_pose_msg(position, rotation, '/nav')
+                print pose
+                print position
                 rospy.sleep(2)
             except:
                 continue

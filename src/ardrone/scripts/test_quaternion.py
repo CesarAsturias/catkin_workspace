@@ -4,11 +4,14 @@ import rospy
 import numpy as np
 import tf
 from geometry_msgs.msg import Quaternion
+from tf.transformations import *
+def vector_to_quaternion(vector):
+    try:
+        quaternion = np.append(vector, [0])
+        return quaternion
+    except ValueError, IndexError:
+        rospy.loginfo("The argument must be a 3-vector")
 
-va = np.array([1, 2, 3])
-va = np.append(va, [0])
 
-va_quaternion = Quaternion(str(va[0]), str(va[1]), str(va[2]), str(va[3]))
-print va
-print va_quaternion
+
 

@@ -13,7 +13,7 @@ import rospy
 import numpy as np
 import tf
 import time
-from geometry_msgs.msg import Point, Quaternion
+from geometry_msgs.msg import Point, Quaternion, PoseStamped
 import matplotlib
 import matplotlib.pyplot as plt
 
@@ -53,7 +53,8 @@ class Robot3D(object):
         # and base (body) frames
         rospy.loginfo("Into get_odom")
         try:
-            (trans, rot) = self.tf_listener.lookupTransform(self.nav_frame, self.base_frame, rospy.Time(0))
+            (trans, rot) = self.tf_listener.lookupTransform(self.nav_frame,
+                                                            self.base_frame, rospy.Time(0))
         except (tf.Exception, tf.ConnectivityException, tf.LookupException):
             rospy.loginfo("TF Exception")
             return
@@ -63,13 +64,54 @@ class Robot3D(object):
     def base_to_nav(self):
         # Obtain the current transform betwen the base (body)
         # and the nav (inertial) frames.
+        # @param none
+        # @return trans: translation vector
+        # @return rot: rotation Quaternion
         try:
-            (trans, rot) = self.tf_listener.lookupTransform(self.base_frame, self.nav_frame, rospy.Time(0))
+            (trans, rot) = self.tf_listener.lookupTransform(self.base_frame,
+                                                            self.nav_frame, rospy.Time(0))
         except (tf.Exception, tf.ConnectivityException, tf.ExtrapolationException):
             rospy.loginfo("TF Exception")
             return
         return (Point(*trans), Quaternion(*rot))
-    
+
+    def create_pose_msg(self, position, orientation, frame):
+        # Create a PoseStamped msg, which integrates position and orientation
+        # @param position: Point msg containing the position
+        # @param orientation: Quaternion msg containing the orientation
+        # @param frame: frame of the pose. String ('/base_link', for example)
+        # @return pose_stamped: PoseStamped msg
+        
+        Pose_stamped = PoseStamped()
+        Pose_stamped.pose.position = position
+        Pose_stamped.pose.orientation = orientation
+        Pose_stamped.header.frame_id = frame
+        Pose_stamped.header.stamp = rospy.Time.now()
+        return Pose_stamped
+
+    def trans_pose(self, pose, target_frame):
+        # Transform the pose in the current frame (PoseStamped msg) to 
+        # the target_frame
+        # @param pose: pose to transform
+        # @param target_frame: frame to which we transform the pose (string)
+        # @return transformed_pose: PoseStamped message
+        return self.tf_listener.transformPose(target_frame, pose)
+
+
+
+    def vector_to_quaternion(self, vector):
+        # Transform a vector into a Quaternion object(geometry_msgs)
+        # The quaternion convention in tf is q = [qx qy qz qw]. Converting
+        # a vector to a quaternion consists simply in adding the last com-
+        # ponent, qw = 0, to the vector
+        # @param vector: numpy array
+        # @return Quaternion
+        try:
+            quaternion = np.append(vector, [0])
+            return quaternion
+        except ValueError:
+            rospy.loginfo("The argument must be a 3-vector")
+
     def cleanup(self):
         # Always stop the robot when shutting down the node.
         rospy.loginfo("Stopping the robot...")
