@@ -81,7 +81,7 @@ class Robot3D(object):
         # @param orientation: Quaternion msg containing the orientation
         # @param frame: frame of the pose. String ('/base_link', for example)
         # @return pose_stamped: PoseStamped msg
-        
+
         Pose_stamped = PoseStamped()
         Pose_stamped.pose.position = position
         Pose_stamped.pose.orientation = orientation
@@ -90,14 +90,12 @@ class Robot3D(object):
         return Pose_stamped
 
     def trans_pose(self, pose, target_frame):
-        # Transform the pose in the current frame (PoseStamped msg) to 
+        # Transform the pose in the current frame (PoseStamped msg) to
         # the target_frame
         # @param pose: pose to transform
         # @param target_frame: frame to which we transform the pose (string)
         # @return transformed_pose: PoseStamped message
         return self.tf_listener.transformPose(target_frame, pose)
-
-
 
     def vector_to_quaternion(self, vector):
         # Transform a vector into a Quaternion object(geometry_msgs)

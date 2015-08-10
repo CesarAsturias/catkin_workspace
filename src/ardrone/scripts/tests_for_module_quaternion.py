@@ -29,5 +29,9 @@ vector_B = quaternion_multiply(quaternion_multiply(quaternion_transform, quatern
                                                    quaternion_conjugate(quaternion_transform))
 print "vector in frame B", vector_B
 
+# Pose message
+
+
+
 
 

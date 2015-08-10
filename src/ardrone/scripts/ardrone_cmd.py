@@ -12,6 +12,7 @@ import rospy
 import numpy as np
 import time
 from Robot3D import Robot3D
+from geometry_msgs.msg import Point, Quaternion
 
 
 class Ardrone(Robot3D):
@@ -28,9 +29,23 @@ class Ardrone(Robot3D):
             try:
                 (position, rotation) = self.get_odom()
                 (position_base, rotation_base) = self.base_to_nav()
-                pose = self.create_pose_msg(position, rotation, '/nav')
-                print pose
-                print position
+                # Select pose
+                pos = Point()
+                rot = Quaternion()
+                pos.x = 1
+                pos.y = 1
+                pos.z = 1
+                rot.x = 0
+                rot.y = 0
+                rot.z = 0
+                rot.w = 1
+                pose = self.create_pose_msg(pos, rot, '/nav')
+                # Transform to /base_link
+                pose_base = self.trans_pose(pose, '/base_link')
+                print "position_nav", position
+                print "position_base", position_base
+                print "pose_nav", pose
+                print "pose_base", pose_base
                 rospy.sleep(2)
             except:
                 continue
