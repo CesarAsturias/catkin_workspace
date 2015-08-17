@@ -16,10 +16,12 @@ import time
 from geometry_msgs.msg import Point, Quaternion, PoseStamped
 import matplotlib
 import matplotlib.pyplot as plt
+from ardrone_autonomy.msg import Navdata
+from nav_msgs.msg import Odometry
 
 
 class Robot3D(object):
-    def __init__(self, node_name):
+    def __init__(self, node_name, rate):
         self.node_name = node_name
 
         rospy.init_node(node_name)
@@ -28,13 +30,31 @@ class Robot3D(object):
         rospy.on_shutdown(self.cleanup)
 
         # Rate at we will update
-        rate = 20
+        self.rate = rate
 
         # ROS rate variable
-        r = rospy.Rate(rate)
+        self.r = rospy.Rate(self.rate)
 
         # Create a tf.TransformListener object
         self.tf_listener = tf.TransformListener()
+
+        # Create a Publisher object for publish target pose in /base_link frame
+        self.pub_target_pose = rospy.Publisher('target_pose', PoseStamped, queue_size = 10)
+
+        # Time
+        self.last_time = rospy.Time.now()
+
+        # Subscriber to /ardrone/navdata and publish an Odometry msg with navigation data
+        # If the subclass that inherits from Robot3D set navdata, then we have to process
+        # the navdata topic
+        #if navdata:
+         #   odometry = Odometry()
+            #self.navdata_subscriber = rospy.Subscriber("/ardrone/navdata", Navdata, self.nav_callback)
+            #self.navdata_pub = rospy.Publisher('navdata_topic', Odometry, queue_size = 10)
+            # While the node is running, publish the Odometry message at rate frequency
+            #while not rospy.is_shutdown():
+            #    self.navdata_pub.publish(self.odometry)
+            #    r.sleep()
 
        # Give tf some time to fill its buffer
         rospy.sleep(2)
@@ -51,8 +71,9 @@ class Robot3D(object):
     def get_odom(self):
         # Get the current transform between the nav (inertial)
         # and base (body) frames
-        rospy.loginfo("Into get_odom")
+        # rospy.loginfo("Into get_odom")
         try:
+            self.tf_listener.waitForTransform(self.nav_frame, self.base_frame, rospy.Time.now(), rospy.Duration(4.0))
             (trans, rot) = self.tf_listener.lookupTransform(self.nav_frame,
                                                             self.base_frame, rospy.Time(0))
         except (tf.Exception, tf.ConnectivityException, tf.LookupException):
@@ -68,6 +89,7 @@ class Robot3D(object):
         # @return trans: translation vector
         # @return rot: rotation Quaternion
         try:
+            self.tf_listener.waitForTransform(self.nav_frame, self.base_frame, rospy.Time.now(), rospy.Duration(4.0))
             (trans, rot) = self.tf_listener.lookupTransform(self.base_frame,
                                                             self.nav_frame, rospy.Time(0))
         except (tf.Exception, tf.ConnectivityException, tf.ExtrapolationException):
@@ -114,6 +136,7 @@ class Robot3D(object):
         # Always stop the robot when shutting down the node.
         rospy.loginfo("Stopping the robot...")
         rospy.sleep(1)
+
 # If the file is made executable, then run it. Otherwise, use it as a module
 if __name__ == '__main__':
     try:
