@@ -18,6 +18,8 @@ import matplotlib
 import matplotlib.pyplot as plt
 from ardrone_autonomy.msg import Navdata
 from nav_msgs.msg import Odometry
+from math import pi, cos, sin
+from tf import transformations
 
 
 class Robot3D(object):
@@ -39,33 +41,37 @@ class Robot3D(object):
         self.tf_listener = tf.TransformListener()
 
         # Create a Publisher object for publish target pose in /base_link frame
-        self.pub_target_pose = rospy.Publisher('target_pose', PoseStamped, queue_size = 10)
-
-        # Time
-        self.last_time = rospy.Time.now()
-
-        # Subscriber to /ardrone/navdata and publish an Odometry msg with navigation data
-        # If the subclass that inherits from Robot3D set navdata, then we have to process
-        # the navdata topic
-        #if navdata:
-         #   odometry = Odometry()
-            #self.navdata_subscriber = rospy.Subscriber("/ardrone/navdata", Navdata, self.nav_callback)
-            #self.navdata_pub = rospy.Publisher('navdata_topic', Odometry, queue_size = 10)
-            # While the node is running, publish the Odometry message at rate frequency
-            #while not rospy.is_shutdown():
-            #    self.navdata_pub.publish(self.odometry)
-            #    r.sleep()
+        self.pub_target_pose = rospy.Publisher('target_pose', PoseStamped, queue_size=10)
 
        # Give tf some time to fill its buffer
         rospy.sleep(2)
 
-       #set the nav  frame
+       # set the nav  frame
         self.nav_frame = '/nav'
 
        # set the base frame
         self.base_frame = '/base_link'
 
        # Initialize the position variable as Point type
+
+       # Some attributes
+        self.current_time = rospy.Time.now()
+        self.last_time = rospy.Time.now()
+        # Constants for the dynamic model
+        self.c1 = 0.58
+        self.c2 = 17.8
+        self.c3 = 10
+        self.c4 = 35
+        self.c5 = 10
+        self.c6 = 25
+        self.c7 = 1.4
+        self.c8 = 1
+        # Initialize commands
+        self.command_x = 0
+        self.command_y = 0
+        self.command_z = 0
+        self.command_yaw = 0
+
         position = Point()
 
     def get_odom(self):
@@ -132,14 +138,68 @@ class Robot3D(object):
         except ValueError:
             rospy.loginfo("The argument must be a 3-vector")
 
+    def Predict_internal(self, control_command, state):
+        # Prediction model. Function callback for the subscriber to cmd_vel topic
+        # First, calculate the influence of sent controls:
+        self.current_time = rospy.Time.now()
+        dt = (self.current_time - self.last_time).to_sec()
+        q = state.pose.pose.orientation
+        p = state.pose.pose.position
+        print type(q)
+        print q.x
+        rollGain = dt * self.c3 * (self.c4 * control_command.linear.y - q.x)
+        pitchGain = dt * self.c3 * (self.c4 * control_command.linear.x - q.y)
+        yawspeedGain = dt * self.c5 * (self.c6 * control_command.linear.z - state.twist.twist.angular.z)
+        vzGain = dt * self.c7 * (self.c8 * control_command.linear.z - state.twist.twist.linear.z)
+        # Update orientation state
+        roll = q.x + rollGain
+        pitch = q.y + pitchGain
+        yaw = q.z + yawspeedGain * dt
+        # update twist linear
+        yawRad = self.angletorad(q.z)
+        rollRad = self.angletorad(q.x)
+        pitchRad = self.angletorad(q.y)
+
+        forcex = cos(yawRad) * sin(rollRad) * cos(pitchRad) - sin(yawRad) * sin(pitchRad)
+        forcey = -sin(yawRad) * sin(rollRad) * cos(pitchRad) - cos(yawRad) * sin(pitchRad)
+
+        vxGain = dt * (self.c1 * (self.c2 * forcex - state.twist.twist.linear.x))
+        vyGain = dt * (self.c1 * (self.c2 * forcey - state.twist.twist.linear.y))
+
+        # State
+        state.pose.pose.position.x = state.twist.twist.linear.x * dt + state.pose.pose.position.x
+        state.pose.pose.position.y = state.twist.twist.linear.y * dt + state.pose.pose.position.y
+        state.pose.pose.position.z = state.twist.twist.linear.z * dt + state.pose.pose.position.z
+        # TODO: take account of the takeoff
+        quaternion = transformations.quaternion_from_euler(rollRad, pitchRad, yawRad) # It's the correct sequence?
+        #state.pose.pose.orientation = quaternion
+        state.twist.twist.linear.x = vxGain + state.twist.twist.linear.x
+        state.twist.twist.linear.y = vyGain + state.twist.twist.linear.y
+        state.twist.twist.linear.z = vzGain + state.twist.twist.linear.z
+        state.twist.twist.angular.x = rollGain / dt + state.twist.twist.angular.x
+        state.twist.twist.angular.y = pitchGain / dt + state.twist.twist.angular.y
+        state.twist.twist.angular.z = yawspeedGain + state.twist.twist.angular.z
+        print state
+        print type(state)
+
+    def angletorad(self, angle):
+        rad = angle * pi / 180
+        return rad
+
     def cleanup(self):
         # Always stop the robot when shutting down the node.
         rospy.loginfo("Stopping the robot...")
-        rospy.sleep(1)
+        rospy.sleep(0.1)
+
+    def main(args):
+        try:
+            node_name = "Robot3D"
+            rate = 200
+            Robot3D(node_name, rate)
+            rospy.spin()
+        except KeyboardInterrupt:
+            print "Shutting down Robot3D node"
 
 # If the file is made executable, then run it. Otherwise, use it as a module
 if __name__ == '__main__':
-    try:
-        Robot3D()
-    except:
-        rospy.loginfo("Robot3D node terminated")
+    main(sys.argv)
