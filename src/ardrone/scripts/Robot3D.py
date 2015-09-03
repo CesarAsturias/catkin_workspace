@@ -74,6 +74,8 @@ class Robot3D(object):
 
         position = Point()
 
+        self.tf_listener = tf.TransformListener()
+
     def get_odom(self):
         # Get the current transform between the nav (inertial)
         # and base (body) frames
@@ -143,12 +145,14 @@ class Robot3D(object):
         # First, calculate the influence of sent controls:
         self.current_time = rospy.Time.now()
         dt = (self.current_time - self.last_time).to_sec()
+        print "dt = ", dt
         q = state.pose.pose.orientation
         p = state.pose.pose.position
-        print type(q)
-        print q.x
-        rollGain = dt * self.c3 * (self.c4 * control_command.linear.y - q.x)
-        pitchGain = dt * self.c3 * (self.c4 * control_command.linear.x - q.y)
+        rollGain = dt * self.c3 * (self.c4 * control_command.linear.y - state.pose.pose.orientation.x)
+        pitchGain = dt * self.c3 * (self.c4 * control_command.linear.x - state.pose.pose.orientation.y )
+        print "orientation", q
+        print "Roll gain", rollGain
+        print "Pitch gain", pitchGain
         yawspeedGain = dt * self.c5 * (self.c6 * control_command.linear.z - state.twist.twist.angular.z)
         vzGain = dt * self.c7 * (self.c8 * control_command.linear.z - state.twist.twist.linear.z)
         # Update orientation state
@@ -156,23 +160,30 @@ class Robot3D(object):
         pitch = q.y + pitchGain
         yaw = q.z + yawspeedGain * dt
         # update twist linear
-        yawRad = self.angletorad(q.z)
-        rollRad = self.angletorad(q.x)
-        pitchRad = self.angletorad(q.y)
+        yawRad = self.angletorad(state.pose.pose.orientation.z)
+        rollRad = self.angletorad(state.pose.pose.orientation.x)
+        pitchRad = self.angletorad(state.pose.pose.orientation.y)
 
         forcex = cos(yawRad) * sin(rollRad) * cos(pitchRad) - sin(yawRad) * sin(pitchRad)
+        print "forcex", forcex
         forcey = -sin(yawRad) * sin(rollRad) * cos(pitchRad) - cos(yawRad) * sin(pitchRad)
+        print "forcey", forcey
 
         vxGain = dt * (self.c1 * (self.c2 * forcex - state.twist.twist.linear.x))
+        print "vxgain", vxGain
         vyGain = dt * (self.c1 * (self.c2 * forcey - state.twist.twist.linear.y))
+        print "vygain", vyGain
 
         # State
         state.pose.pose.position.x = state.twist.twist.linear.x * dt + state.pose.pose.position.x
         state.pose.pose.position.y = state.twist.twist.linear.y * dt + state.pose.pose.position.y
-        state.pose.pose.position.z = state.twist.twist.linear.z * dt + state.pose.pose.position.z
+        state.pose.pose.position.z = state.twist.twist.linear.z * dt + state.pose.pose.position.z 
         # TODO: take account of the takeoff
-        quaternion = transformations.quaternion_from_euler(rollRad, pitchRad, yawRad) # It's the correct sequence?
-        #state.pose.pose.orientation = quaternion
+        #quaternion = transformations.quaternion_from_euler(rollRad, pitchRad, yawRad) # Is it the correct sequence?
+        state.pose.pose.orientation.x += rollGain
+        state.pose.pose.orientation.y += pitchGain
+        state.pose.pose.orientation.z += state.twist.twist.angular.z * dt + yawspeedGain * dt / 2
+        #state.pose.pose.orientation.w += 
         state.twist.twist.linear.x = vxGain + state.twist.twist.linear.x
         state.twist.twist.linear.y = vyGain + state.twist.twist.linear.y
         state.twist.twist.linear.z = vzGain + state.twist.twist.linear.z
@@ -181,6 +192,11 @@ class Robot3D(object):
         state.twist.twist.angular.z = yawspeedGain + state.twist.twist.angular.z
         print state
         print type(state)
+        self.last_time = rospy.Time.now()
+
+        (trans, rot) = self.base_to_nav()
+        print "trans",  trans
+        print "rot", rot
 
     def angletorad(self, angle):
         rad = angle * pi / 180

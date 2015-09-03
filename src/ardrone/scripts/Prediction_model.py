@@ -25,6 +25,7 @@ class Kalman_Filter(Robot3D):
 
         # Create subscriber and publisher object
         self.command_sub = rospy.Subscriber("cmd_vel", Twist, self.Predict_internal, self.state)
+        
 
 
         #self.odom_sub = rospy.Subscriber("odometry", Odometry, self.Actualization, self.state)
