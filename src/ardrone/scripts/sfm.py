@@ -45,6 +45,7 @@ class Sfm_ROS(CvBridgeROS):
         self.img = self.draw_correlation(self.img_keypoints, self.matches,
                                          self.keypoints, self.prev_keypoints)
 
+        # Copy 
         self.prev_img = self.img
         self.prev_keypoints = self.features_deepcopy(self.keypoints)
 
@@ -70,7 +71,10 @@ class Sfm_ROS(CvBridgeROS):
         # Draw a line betwen the last keypoint position 
         # and the new keypoint position (correlated)
         # @param matches: A matcher object (opencv)
-        # @return none
+        # @param img: image
+        # @param keypoints: keypoints of the new frame
+        # @param prev_keypoints: keypoints of the old frame
+        # @return img: image with lines betwen correlated points
         
         for i in range(0, len(matches)):
             self.idtrain = matches[i].trainIdx
@@ -79,10 +83,6 @@ class Sfm_ROS(CvBridgeROS):
             self.point_query = keypoints[self.idquery].pt
             self.point_train = self.transform_float_int_tuple(self.point_train)
             self.point_query = self.transform_float_int_tuple(self.point_query)
-            print self.point_train
-            print self.point_query
-            print i
-            print len(matches)
             cv2.line(img, ((self.point_train[0]), (self.point_train[1])),
                     ((self.point_query[0]), (self.point_query[1])), (255, 0, 0), i)
         return img
