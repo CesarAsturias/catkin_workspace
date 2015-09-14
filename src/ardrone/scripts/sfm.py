@@ -18,7 +18,7 @@ class Sfm_ROS(CvBridgeROS):
         # Initialize a ORB
         # self.detector = cv2.FeatureDetector_create("ORB")
         # self.descriptor = cv2.DescriptorExtractor_create("ORB")
-        self.detector = cv2.ORB(10, 2, 10)
+        self.detector = cv2.ORB(7, 2, 10)
         self.prev_img = None
         self.prev_keypoints = KeyPoint()
         self.bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
@@ -32,35 +32,23 @@ class Sfm_ROS(CvBridgeROS):
             self.prev_img = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
             self.prev_keypoints = self.detector.detect(self.prev_img, None)
             self.prev_keypoints, self.prev_descriptor = self.detector.compute(self.prev_img, self.prev_keypoints)
-            
+
         self.img = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
         self.keypoints = self.detector.detect(self.img, None)
         self.keypoints, self.descriptor = self.detector.compute(self.img, self.keypoints)
-        
+
         self.matches = self.bf.match(self.prev_descriptor, self.descriptor)
         self.matches = sorted(self.matches, key=lambda x: x.distance)
 
         # Draw it on the image
         self.img_keypoints = cv2.drawKeypoints(self.img, self.keypoints, None, (255, 0, 0), 4)
+        self.img = self.draw_correlation(self.img_keypoints, self.matches,
+                                         self.keypoints, self.prev_keypoints)
 
-
-        for i in range(0, len(self.matches)):
-            self.idtrain = self.matches[i].trainIdx
-            self.idquery = self.matches[i].queryIdx
-            print "train", self.idtrain
-            print "query", self.idquery
-            self.point_train = self.keypoints[self.idtrain].pt
-            self.point_query = self.prev_keypoints[self.idquery].pt
-            print "train position", self.point_train
-            print "query position", self.point_query
-            self.point_train = self.transform_float_int_tuple(self.point_train)
-            self.point_query = self.transform_float_int_tuple(self.point_query)
-            cv2.line(self.img_keypoints, ((self.point_train[0]), (self.point_train[1])),
-                             ((self.point_query[0]), (self.point_query[1])), (255, 0, 0), 5)
         self.prev_img = self.img
         self.prev_keypoints = self.features_deepcopy(self.keypoints)
-        
-        return self.img_keypoints
+
+        return self.img
 
     def transform_float_int_tuple(self, input_tuple):
         output_tuple = [0, 0]
@@ -77,6 +65,28 @@ class Sfm_ROS(CvBridgeROS):
                 _size = k.size, _angle = k.angle,
                 _response=k.response, _octave=k.octave,
                 _class_id=k.class_id) for k in features]
+
+    def draw_correlation(self, img, matches, keypoints, prev_keypoints):
+        # Draw a line betwen the last keypoint position 
+        # and the new keypoint position (correlated)
+        # @param matches: A matcher object (opencv)
+        # @return none
+        
+        for i in range(0, len(matches)):
+            self.idtrain = matches[i].trainIdx
+            self.idquery = matches[i].queryIdx
+            self.point_train = keypoints[self.idtrain].pt
+            self.point_query = keypoints[self.idquery].pt
+            self.point_train = self.transform_float_int_tuple(self.point_train)
+            self.point_query = self.transform_float_int_tuple(self.point_query)
+            print self.point_train
+            print self.point_query
+            print i
+            print len(matches)
+            cv2.line(img, ((self.point_train[0]), (self.point_train[1])),
+                    ((self.point_query[0]), (self.point_query[1])), (255, 0, 0), i)
+        return img
+
 
 
 if __name__ == '__main__':
