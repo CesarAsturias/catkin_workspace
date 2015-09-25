@@ -14,50 +14,52 @@ from cv2 import KeyPoint
 class Sfm_ROS(CvBridgeROS):
     def __init__(self, node_name):
         super(Sfm_ROS, self).__init__(node_name)
-        print cv2.__version__
+
         # Initialize a ORB
         # self.detector = cv2.FeatureDetector_create("ORB")
         # self.descriptor = cv2.DescriptorExtractor_create("ORB")
-        self.detector = cv2.ORB(7, 2, 10)
+        self.detector = cv2.ORB(20, 2, 10)
         self.prev_img = None
         self.prev_keypoints = KeyPoint()
-        self.bf = cv2.BFMatcher(cv2.NORM_L2, crossCheck=True)
+        self.bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
         self.matches = None
         self.point_train = []
         self.point_query = []
-        self.surf = cv2.SURF(1500)
 
     def process_image(self, cv_image):
         # Find keypoints and descriptors directly
         if self.prev_img is None:
             self.prev_img = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
-            #self.prev_keypoints = self.detector.detect(self.prev_img, None)
-            self.prev_keypoints, self.prev_descriptor = self.surf.detectAndCompute(self.prev_img, None)
-            #self.prev_keypoints, self.prev_descriptor = self.detector.compute(self.prev_img, self.prev_keypoints)
-            print len(self.prev_keypoints)
+
 
         self.img = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
-        #self.keypoints = self.detector.detect(self.img, None)
-        self.keypoints, self.descriptor = self.surf.detectAndCompute(self.img, None)
-        #self.keypoints, self.descriptor = self.detector.compute(self.img, self.keypoints)
-        print "previo", self.prev_descriptor
-        print "actual", self.descriptor
-        print len(self.keypoints)
-        print len(self.prev_keypoints)
 
-        self.matches = self.bf.match(self.prev_descriptor, self.descriptor)
-        self.matches = sorted(self.matches, key=lambda x: x.distance)
+        self.matches = self.match_images(self.prev_img, self.img)
 
         # Draw it on the image
         self.img_keypoints = cv2.drawKeypoints(self.img, self.keypoints, None, (255, 0, 0), 4)
-        #self.img = self.draw_correlation(self.img_keypoints, self.matches,
-                                        # self.keypoints, self.prev_keypoints)
+        self.img = self.draw_correlation(self.img_keypoints, self.matches,
+                                         self.keypoints, self.prev_keypoints)
 
         # Copy 
         self.prev_img = self.img
         self.prev_keypoints = self.features_deepcopy(self.keypoints)
 
-        return self.img_keypoints
+        return self.img
+
+    def match_images(self, img1, img2):
+        # Compute feature matching between two images.
+        # @param img1: first image
+        # @param img2: last image
+        # @return matches: list of DMatch objects
+        self.keypoints = self.detector.detect(img2, None)
+        self.keypoints, self.descriptor = self.detector.compute(img2, self.keypoints)
+        self.prev_keypoints = self.detector.detect(img1, None)
+        self.prev_keypoints, self.prev_descriptor = self.detector.compute(img1, self.prev_keypoints)
+
+        self.matches_vector = self.bf.match(self.prev_descriptor, self.descriptor)
+        self.matches_vector = sorted(self.matches_vector, key=lambda x: x.distance)
+        return self.matches_vector
 
     def transform_float_int_tuple(self, input_tuple):
         output_tuple = [0, 0]
